@@ -1,199 +1,221 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Тренажер</title>
-<style>
-body { font-family: Arial, sans-serif; background: #f2f2f2; margin:0; padding:20px; }
-.hidden { display:none; }
-.quiz-container { background:#fff; padding:20px; border-radius:10px; max-width:600px; margin:auto; box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-button { margin:5px; padding:10px 15px; border:none; border-radius:5px; cursor:pointer;}
-.answer-btn { background:#eee; }
-.answer-btn:hover { background:#ddd; }
-.correct-feedback { background:#4CAF50 !important; color:white;}
-.incorrect-feedback { background:#f44336 !important; color:white;}
-</style>
+  <meta charset="UTF-8">
+  <title>Тренажёр умножения</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #eef2f7;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: #4a90e2;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+    .container {
+      max-width: 700px;
+      margin: 30px auto;
+      padding: 20px;
+    }
+    .section, .quiz {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+    h2 { color: #4a90e2; }
+    .menu button, .options button, #nextBtn, #backBtn {
+      display: block;
+      width: 100%;
+      margin: 10px 0;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .menu button { background: #4a90e2; color: white; }
+    .menu button:hover { background: #357ac9; }
+
+    .options button { background: #f0f0f0; }
+    .options button:hover { background: #e0e0e0; }
+    .options button.correct { background: #8be78b !important; color: #064d06; }
+    .options button.wrong { background: #ff7b7b !important; color: #4d0606; }
+
+    #nextBtn { background: #4a90e2; color: white; }
+    #backBtn { background: #777; color: white; }
+
+    #feedback {
+      font-size: 18px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    #feedback.correct { color: green; }
+    #feedback.wrong { color: red; }
+  </style>
 </head>
 <body>
-<div class="quiz-container">
-<h1>Тренажер множення</h1>
-<div id="menu">
-  <button onclick="startQuiz(1)">Розділ 1 (35)</button>
-  <button onclick="startQuiz(2)">Розділ 2 (17)</button>
-  <button onclick="startQuiz(3)">Розділ 3 (8)</button>
-  <button onclick="startQuiz(4)">Розділ 4 (5)</button>
-  <button onclick="startQuiz(5)">Розділ 5 (рандомні приклади)</button>
-</div>
+  <header>
+    <h1>Тренажёр умножения</h1>
+  </header>
 
-<div id="quiz" class="hidden">
-  <p><span id="current-index">1</span> з <span id="total-problems">20</span></p>
-  <h2 id="problem"></h2>
-  <div id="answer-buttons"></div>
-  <p id="feedback"></p>
-  <button id="next-btn" class="hidden" onclick="nextProblem()">Далі</button>
-</div>
+  <div class="container">
+    <!-- Главное меню -->
+    <div id="menu" class="menu section">
+      <h2>Выбери раздел</h2>
+      <button onclick="startSection(1)">Раздел 1: умножение на 35</button>
+      <button onclick="startSection(2)">Раздел 2: умножение на 17</button>
+      <button onclick="startSection(3)">Раздел 3: умножение на 8</button>
+      <button onclick="startSection(4)">Раздел 4: умножение на 5</button>
+      <button onclick="startSection(5)">Раздел 5: сложные выражения</button>
+    </div>
 
-<div id="result" class="hidden">
-  <h2>Результат</h2>
-  <p>Правильних: <span id="correct-count"></span></p>
-  <p>Неправильних: <span id="incorrect-count"></span></p>
-  <button onclick="goHome()">На головну</button>
-</div>
-</div>
+    <!-- Экран теста -->
+    <div id="quiz" class="quiz section" style="display:none;">
+      <h2 id="quizTitle"></h2>
+      <div id="question" class="question"></div>
+      <div id="options" class="options"></div>
+      <div id="feedback"></div>
+      <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Следующий</button>
+      <button id="backBtn" onclick="backToMenu()">Назад в меню</button>
+    </div>
+  </div>
 
-<script>
-let currentQuizData = [];
-let currentProblemIndex = 0;
-let correctCount = 0;
-let incorrectCount = 0;
-let isAnswered = false;
+  <script>
+    let currentSection = 0;
+    let questions = [];
+    let currentIndex = 0;
+    let score = 0;
 
-const quizEl = document.getElementById('quiz');
-const menuEl = document.getElementById('menu');
-const problemEl = document.getElementById('problem');
-const feedbackEl = document.getElementById('feedback');
-const answerContainer = document.getElementById('answer-buttons');
-const nextBtn = document.getElementById('next-btn');
-const resultEl = document.getElementById('result');
-const correctEl = document.getElementById('correct-count');
-const incorrectEl = document.getElementById('incorrect-count');
-const indexEl = document.getElementById('current-index');
-const totalEl = document.getElementById('total-problems');
-
-// Перемішування масиву
-function shuffle(array) {
-  return array.sort(() => Math.random() - 0.5);
-}
-
-// Генератор для розділів 1–4 (уникальные примеры)
-function generateSimpleProblems(number) {
-  const multipliers = Array.from({length: 20}, (_, i) => i + 1);
-  const shuffled = shuffle(multipliers);
-  const problems = [];
-  for (let i = 0; i < 20; i++) {
-    const b = shuffled[i];
-    problems.push({
-      problem: `${number} × ${b} = ?`,
-      answer: number * b
-    });
+function generateUniqueExamples(base) {
+  let examples = [];
+  for (let i = 1; i <= 20; i++) {
+    examples.push({ q: `${base} × ${i}`, a: base * i, base });
   }
-  return shuffle(problems);
+  // Перемешиваем массив случайным образом
+  for (let i = examples.length - 1; i > 0; i--) {
+    let j = Math.floor(Math.random() * (i + 1));
+    [examples[i], examples[j]] = [examples[j], examples[i]];
+  }
+  return examples;
 }
 
-// Генератор для 5-го раздела (рандомные выражения 2-4 скобки)
-function generateRandomProblems(count = 20) {
-  const firstNumbers = [35, 17, 8, 5];
-  const problems = [];
-  for (let i = 0; i < count; i++) {
-    const partsCount = Math.floor(Math.random() * 3) + 2; // 2-4 выражения
-    let expression = "";
-    let answer = 0;
-    for (let j = 0; j < partsCount; j++) {
-      const a = firstNumbers[Math.floor(Math.random() * firstNumbers.length)];
-      const b = Math.floor(Math.random() * 20) + 1;
-      if (j > 0) expression += " + ";
-      expression += `(${a} × ${b})`;
-      answer += a * b;
+    function generateOptions(correct, base) {
+      let options = new Set();
+      options.add(correct);
+      while (options.size < 4) {
+        let delta = Math.floor(Math.random() * 10) + 1;
+        let wrong;
+        if (base === 35 || base === 5) {
+          wrong = Math.round((correct + (Math.random() < 0.5 ? -delta : delta) * 5) / 5) * 5;
+        } else {
+          wrong = correct + (Math.random() < 0.5 ? -delta : delta);
+        }
+        if (wrong > 0 && wrong !== correct) options.add(wrong);
+      }
+      return Array.from(options).sort(() => Math.random() - 0.5);
     }
-    expression += " = ?";
-    problems.push({ problem: expression, answer });
-  }
-  return problems;
-}
 
-function startQuiz(section) {
-  currentProblemIndex = 0;
-  correctCount = 0;
-  incorrectCount = 0;
-  isAnswered = false;
+    function generateComplexExamples() {
+      let bases = [35, 17, 8, 5];
+      let examples = [];
+      for (let i = 0; i < 20; i++) {
+        let partsCount = Math.floor(Math.random() * 3) + 2;
+        let expr = [];
+        let answer = 0;
+        for (let j = 0; j < partsCount; j++) {
+          let base = bases[Math.floor(Math.random() * bases.length)];
+          let num = Math.floor(Math.random() * 20) + 1;
+          expr.push(`(${base} × ${num})`);
+          answer += base * num;
+        }
+        examples.push({ q: expr.join(" + "), a: answer, base: "complex" });
+      }
+      return examples;
+    }
 
-  if (section === 1) currentQuizData = generateSimpleProblems(35);
-  if (section === 2) currentQuizData = generateSimpleProblems(17);
-  if (section === 3) currentQuizData = generateSimpleProblems(8);
-  if (section === 4) currentQuizData = generateSimpleProblems(5);
-  if (section === 5) currentQuizData = generateRandomProblems();
+    function startSection(section) {
+      currentSection = section;
+      currentIndex = 0;
+      score = 0;
+      if (section === 1) {
+        questions = generateUniqueExamples(35);
+        document.getElementById("quizTitle").textContent = "Раздел 1: умножение на 35";
+      } else if (section === 2) {
+        questions = generateUniqueExamples(17);
+        document.getElementById("quizTitle").textContent = "Раздел 2: умножение на 17";
+      } else if (section === 3) {
+        questions = generateUniqueExamples(8);
+        document.getElementById("quizTitle").textContent = "Раздел 3: умножение на 8";
+      } else if (section === 4) {
+        questions = generateUniqueExamples(5);
+        document.getElementById("quizTitle").textContent = "Раздел 4: умножение на 5";
+      } else if (section === 5) {
+        questions = generateComplexExamples();
+        document.getElementById("quizTitle").textContent = "Раздел 5: сложные выражения";
+      }
+      document.getElementById("menu").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      showQuestion();
+    }
 
-  totalEl.textContent = currentQuizData.length;
-  menuEl.classList.add('hidden');
-  quizEl.classList.remove('hidden');
-  resultEl.classList.add('hidden');
+    function showQuestion() {
+      let feedback = document.getElementById("feedback");
+      feedback.textContent = "";
+      feedback.className = "";
 
-  displayProblem();
-}
+      if (currentIndex >= questions.length) {
+        document.getElementById("question").innerHTML = `<h3>Тест завершён!</h3><p>Правильных ответов: ${score} из ${questions.length}</p>`;
+        document.getElementById("options").innerHTML = "";
+        document.getElementById("nextBtn").style.display = "none";
+        return;
+      }
 
-function displayProblem() {
-  if (currentProblemIndex >= currentQuizData.length) {
-    showResults();
-    return;
-  }
+      let ex = questions[currentIndex];
+      document.getElementById("question").textContent = `${currentIndex + 1}) ${ex.q} = ?`;
 
-  indexEl.textContent = currentProblemIndex + 1;
-  isAnswered = false;
+      let opts = generateOptions(ex.a, ex.base);
+      let optDiv = document.getElementById("options");
+      optDiv.innerHTML = "";
 
-  const problemObj = currentQuizData[currentProblemIndex];
-  problemEl.textContent = problemObj.problem;
-  feedbackEl.textContent = "";
-  nextBtn.classList.add('hidden');
+      opts.forEach(o => {
+        let btn = document.createElement("button");
+        btn.textContent = o;
+        btn.onclick = () => {
+          if (o === ex.a) {
+            btn.classList.add("correct");
+            feedback.textContent = "✅ Правильно!";
+            feedback.className = "correct";
+            score++;
+          } else {
+            btn.classList.add("wrong");
+            feedback.textContent = `❌ Неправильно. Правильный ответ: ${ex.a}`;
+            feedback.className = "wrong";
+          }
+          Array.from(optDiv.children).forEach(b => b.disabled = true);
+          document.getElementById("nextBtn").style.display = "block";
+        };
+        optDiv.appendChild(btn);
+      });
 
-  const options = generateOptions(problemObj.answer);
-  answerContainer.innerHTML = "";
+      document.getElementById("nextBtn").style.display = "none";
+    }
 
-  options.forEach(option => {
-    const btn = document.createElement('button');
-    btn.className = "answer-btn";
-    btn.textContent = option;
-    btn.onclick = () => handleAnswer(option, problemObj.answer);
-    answerContainer.appendChild(btn);
-  });
-}
+    function nextQuestion() {
+      currentIndex++;
+      showQuestion();
+    }
 
-function generateOptions(correct) {
-  const options = [correct];
-  while (options.length < 4) {
-    const wrong = correct + Math.floor(Math.random() * 20) - 10;
-    if (wrong > 0 && !options.includes(wrong)) options.push(wrong);
-  }
-  return shuffle(options);
-}
-
-function handleAnswer(selected, correct) {
-  if (isAnswered) return;
-  isAnswered = true;
-
-  if (selected === correct) {
-    feedbackEl.textContent = "Правильно!";
-    correctCount++;
-  } else {
-    feedbackEl.textContent = `Неправильно. Правильна відповідь: ${correct}`;
-    incorrectCount++;
-  }
-
-  document.querySelectorAll('.answer-btn').forEach(btn => {
-    if (parseInt(btn.textContent) === correct) btn.classList.add('correct-feedback');
-    else if (parseInt(btn.textContent) === selected) btn.classList.add('incorrect-feedback');
-  });
-
-  nextBtn.classList.remove('hidden');
-}
-
-function nextProblem() {
-  currentProblemIndex++;
-  displayProblem();
-}
-
-function showResults() {
-  quizEl.classList.add('hidden');
-  resultEl.classList.remove('hidden');
-  correctEl.textContent = correctCount;
-  incorrectEl.textContent = incorrectCount;
-}
-
-function goHome() {
-  menuEl.classList.remove('hidden');
-  quizEl.classList.add('hidden');
-  resultEl.classList.add('hidden');
-}
-</script>
+    function backToMenu() {
+      document.getElementById("menu").style.display = "block";
+      document.getElementById("quiz").style.display = "none";
+    }
+  </script>
 </body>
 </html>
