@@ -29,7 +29,7 @@
       text-align: center;
     }
     h2 { color: #4a90e2; }
-    .menu button, .options button, #nextBtn, #backBtn {
+    .menu button, .options button, #nextBtn, #backBtn, #submitBtn {
       display: block;
       width: 100%;
       margin: 10px 0;
@@ -48,7 +48,7 @@
     .options button.correct { background: #8be78b !important; color: #064d06; }
     .options button.wrong { background: #ff7b7b !important; color: #4d0606; }
 
-    #nextBtn { background: #4a90e2; color: white; }
+    #nextBtn, #submitBtn { background: #4a90e2; color: white; }
     #backBtn { background: #777; color: white; }
 
     #feedback {
@@ -58,6 +58,23 @@
     }
     #feedback.correct { color: green; }
     #feedback.wrong { color: red; }
+
+    #timer {
+      font-size: 18px;
+      color: #333;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    input[type="number"] {
+      padding: 10px;
+      font-size: 18px;
+      width: 150px;
+      text-align: center;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -74,13 +91,21 @@
       <button onclick="startSection(3)">Раздел 3: умножение на 8</button>
       <button onclick="startSection(4)">Раздел 4: умножение на 5</button>
       <button onclick="startSection(5)">Раздел 5: сложные выражения</button>
+      <button onclick="startSection(6)">Раздел 6: тест на скорость (35,17,8,5)</button>
     </div>
 
     <!-- Экран теста -->
     <div id="quiz" class="quiz section" style="display:none;">
       <h2 id="quizTitle"></h2>
+      <div id="timer" style="display:none;"></div>
       <div id="question" class="question"></div>
       <div id="options" class="options"></div>
+
+      <div id="inputArea" style="display:none;">
+        <input type="number" id="answerInput" placeholder="Введите ответ">
+        <button id="submitBtn" onclick="submitAnswer()">Ответить</button>
+      </div>
+
       <div id="feedback"></div>
       <button id="nextBtn" onclick="nextQuestion()" style="display:none;">Следующий</button>
       <button id="backBtn" onclick="backToMenu()">Назад в меню</button>
@@ -92,36 +117,68 @@
     let questions = [];
     let currentIndex = 0;
     let score = 0;
+    let mistakes = 0;
+    let timerInterval = null;
+    let seconds = 0;
 
-function generateUniqueExamples(base) {
-  let examples = [];
-  for (let i = 1; i <= 20; i++) {
-    examples.push({ q: `${base} × ${i}`, a: base * i, base });
-  }
-  // Перемешиваем массив случайным образом
-  for (let i = examples.length - 1; i > 0; i--) {
-    let j = Math.floor(Math.random() * (i + 1));
-    [examples[i], examples[j]] = [examples[j], examples[i]];
-  }
-  return examples;
-}
-
-    function generateOptions(correct, base) {
-      let options = new Set();
-      options.add(correct);
-      while (options.size < 4) {
-        let delta = Math.floor(Math.random() * 10) + 1;
-        let wrong;
-        if (base === 35 || base === 5) {
-          wrong = Math.round((correct + (Math.random() < 0.5 ? -delta : delta) * 5) / 5) * 5;
-        } else {
-          wrong = correct + (Math.random() < 0.5 ? -delta : delta);
-        }
-        if (wrong > 0 && wrong !== correct) options.add(wrong);
-      }
-      return Array.from(options).sort(() => Math.random() - 0.5);
+    // Таймер (используется только для раздела 6)
+    function startTimer() {
+      seconds = 0;
+      const timerEl = document.getElementById("timer");
+      timerEl.style.display = "block";
+      timerEl.textContent = `⏱ Время: 0 мин 00 сек`;
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        seconds++;
+        const min = Math.floor(seconds / 60);
+        const sec = seconds % 60;
+        timerEl.textContent = `⏱ Время: ${min} мин ${sec < 10 ? "0" + sec : sec} сек`;
+      }, 1000);
     }
 
+    function stopTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    // Генерация 20 уникальных примеров для одного base (1..20) и перемешивание
+    function generateUniqueExamples(base) {
+      let examples = [];
+      for (let i = 1; i <= 20; i++) {
+        examples.push({ q: `${base} × ${i}`, a: base * i, base });
+      }
+      for (let i = examples.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [examples[i], examples[j]] = [examples[j], examples[i]];
+      }
+      return examples;
+    }
+
+    // Генерация 20 уникальных смешанных примеров (без повторов)
+    function generateMixedUniqueExamples() {
+      const bases = [35, 17, 8, 5];
+      const allSet = new Set();
+      const result = [];
+      while (result.length < 20) {
+        const base = bases[Math.floor(Math.random() * bases.length)];
+        const num = Math.floor(Math.random() * 20) + 1;
+        const key = `${base}×${num}`;
+        if (!allSet.has(key)) {
+          allSet.add(key);
+          result.push({ q: `${base} × ${num}`, a: base * num, base });
+        }
+      }
+      // Перемешать результат
+      for (let i = result.length - 1; i > 0; i--) {
+        let j = Math.floor(Math.random() * (i + 1));
+        [result[i], result[j]] = [result[j], result[i]];
+      }
+      return result;
+    }
+
+    // Сложные выражения (как было)
     function generateComplexExamples() {
       let bases = [35, 17, 8, 5];
       let examples = [];
@@ -140,10 +197,17 @@ function generateUniqueExamples(base) {
       return examples;
     }
 
+    // Старт раздела
     function startSection(section) {
       currentSection = section;
       currentIndex = 0;
       score = 0;
+      mistakes = 0;
+
+      // Прячем таймер по умолчанию — покажем только для раздела 6
+      document.getElementById("timer").style.display = "none";
+      stopTimer();
+
       if (section === 1) {
         questions = generateUniqueExamples(35);
         document.getElementById("quizTitle").textContent = "Раздел 1: умножение на 35";
@@ -159,63 +223,153 @@ function generateUniqueExamples(base) {
       } else if (section === 5) {
         questions = generateComplexExamples();
         document.getElementById("quizTitle").textContent = "Раздел 5: сложные выражения";
+      } else if (section === 6) {
+        questions = generateMixedUniqueExamples();
+        document.getElementById("quizTitle").textContent = "Раздел 6: тест на скорость (35,17,8,5)";
+        // показать и запустить таймер только для раздела 6
+        startTimer();
       }
+
       document.getElementById("menu").style.display = "none";
       document.getElementById("quiz").style.display = "block";
       showQuestion();
     }
 
+    // Показ вопроса
     function showQuestion() {
       let feedback = document.getElementById("feedback");
       feedback.textContent = "";
       feedback.className = "";
 
+      let optDiv = document.getElementById("options");
+      let inputArea = document.getElementById("inputArea");
+
+      // Если вопросы кончились — разный вывод для раздела 6 и для 1-5
       if (currentIndex >= questions.length) {
-        document.getElementById("question").innerHTML = `<h3>Тест завершён!</h3><p>Правильных ответов: ${score} из ${questions.length}</p>`;
-        document.getElementById("options").innerHTML = "";
-        document.getElementById("nextBtn").style.display = "none";
+        if (currentSection === 6) {
+          // для раздела 6 — показать количество ошибок и время
+          stopTimer();
+          const min = Math.floor(seconds / 60);
+          const sec = seconds % 60;
+          document.getElementById("question").innerHTML =
+            `<h3>Тест завершён!</h3>
+             <p>Количество ошибок: ${mistakes}</p>
+             <p>⏱ Ваше время: ${min} мин ${sec < 10 ? "0" + sec : sec} сек</p>`;
+          optDiv.innerHTML = "";
+          inputArea.style.display = "none";
+          document.getElementById("nextBtn").style.display = "none";
+        } else {
+          // для разделов 1-5 — НЕ трогаем их логику: показываем количество правильных ответов (как раньше)
+          document.getElementById("question").innerHTML =
+            `<h3>Тест завершён!</h3><p>Правильных ответов: ${score} из ${questions.length}</p>`;
+          optDiv.innerHTML = "";
+          inputArea.style.display = "none";
+          document.getElementById("nextBtn").style.display = "none";
+        }
         return;
       }
 
+      // Иначе выводим текущий вопрос
       let ex = questions[currentIndex];
       document.getElementById("question").textContent = `${currentIndex + 1}) ${ex.q} = ?`;
 
-      let opts = generateOptions(ex.a, ex.base);
-      let optDiv = document.getElementById("options");
-      optDiv.innerHTML = "";
-
-      opts.forEach(o => {
-        let btn = document.createElement("button");
-        btn.textContent = o;
-        btn.onclick = () => {
-          if (o === ex.a) {
-            btn.classList.add("correct");
-            feedback.textContent = "✅ Правильно!";
-            feedback.className = "correct";
-            score++;
-          } else {
-            btn.classList.add("wrong");
-            feedback.textContent = `❌ Неправильно. Правильный ответ: ${ex.a}`;
-            feedback.className = "wrong";
-          }
-          Array.from(optDiv.children).forEach(b => b.disabled = true);
-          document.getElementById("nextBtn").style.display = "block";
-        };
-        optDiv.appendChild(btn);
-      });
-
-      document.getElementById("nextBtn").style.display = "none";
+      if (currentSection === 6) {
+        // ручной ввод
+        optDiv.innerHTML = "";
+        inputArea.style.display = "block";
+        const input = document.getElementById("answerInput");
+        input.value = "";
+        input.focus();
+        document.getElementById("nextBtn").style.display = "none";
+      } else {
+        // прежняя логика с кнопками (не трогаем)
+        inputArea.style.display = "none";
+        let opts = generateOptions(ex.a, ex.base);
+        optDiv.innerHTML = "";
+        opts.forEach(o => {
+          let btn = document.createElement("button");
+          btn.textContent = o;
+          btn.onclick = () => {
+            if (o === ex.a) {
+              btn.classList.add("correct");
+              feedback.textContent = "✅ Правильно!";
+              feedback.className = "correct";
+              score++;
+            } else {
+              btn.classList.add("wrong");
+              feedback.textContent = `❌ Неправильно. Правильный ответ: ${ex.a}`;
+              feedback.className = "wrong";
+            }
+            Array.from(optDiv.children).forEach(b => b.disabled = true);
+            document.getElementById("nextBtn").style.display = "block";
+          };
+          optDiv.appendChild(btn);
+        });
+        document.getElementById("nextBtn").style.display = "none";
+      }
     }
 
+    // Генерация опций (оставлена без изменений)
+    function generateOptions(correct, base) {
+      let options = new Set();
+      options.add(correct);
+      while (options.size < 4) {
+        let delta = Math.floor(Math.random() * 10) + 1;
+        let wrong;
+        if (base === 35 || base === 5) {
+          wrong = Math.round((correct + (Math.random() < 0.5 ? -delta : delta) * 5) / 5) * 5;
+        } else {
+          wrong = correct + (Math.random() < 0.5 ? -delta : delta);
+        }
+        if (wrong > 0 && wrong !== correct) options.add(wrong);
+      }
+      return Array.from(options).sort(() => Math.random() - 0.5);
+    }
+
+    // Обработка ответа в разделе 6
+    function submitAnswer() {
+      let input = document.getElementById("answerInput");
+      let value = Number(input.value);
+      let feedback = document.getElementById("feedback");
+      let ex = questions[currentIndex];
+
+      if (value === ex.a) {
+        feedback.textContent = "✅ Правильно!";
+        feedback.className = "correct";
+        currentIndex++;
+        // переход к следующему через небольшую паузу
+        setTimeout(showQuestion, 500);
+      } else {
+        feedback.textContent = "❌ Ошибка, попробуй ещё!";
+        feedback.className = "wrong";
+        mistakes++;
+      }
+    }
+
+    // Нормальный next для разделов 1-5
     function nextQuestion() {
       currentIndex++;
       showQuestion();
     }
 
+    // Возврат в меню — останавливаем таймер и скрываем тест
     function backToMenu() {
+      stopTimer();
+      document.getElementById("timer").style.display = "none";
       document.getElementById("menu").style.display = "block";
       document.getElementById("quiz").style.display = "none";
     }
+
+    // Вешаем Enter на input (полезно)
+    document.addEventListener("keydown", function(e) {
+      if (e.key === "Enter" && document.getElementById("quiz").style.display === "block") {
+        if (currentSection === 6 && document.getElementById("inputArea").style.display === "block") {
+          submitAnswer();
+        } else if (currentSection !== 6 && document.getElementById("nextBtn").style.display === "block") {
+          nextQuestion();
+        }
+      }
+    });
   </script>
 </body>
 </html>
