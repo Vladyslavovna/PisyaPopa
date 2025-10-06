@@ -71,17 +71,85 @@
 			const elWrong = document.getElementById('wrong');
 			const elResult = document.getElementById('result');
 
-			let correctCount = 0, wrongCount = 0;
-			let current = [];
+						let correctCount = 0, wrongCount = 0;
+						let current = [];
+						// Реалистичный шуз: несколько колод, раздача без возврата
+						let shoe = [];
+						const DECKS = 6; // можно изменить: 6-deck shoe — реалистично для казино
+
+						function buildShoe(decks){
+							const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+							const suits = ['♠','♥','♦','♣'];
+							const s = [];
+							for(let d=0; d<decks; d++){
+								for(const r of ranks){
+									for(const su of suits){
+										s.push({rank:r, suit:su});
+									}
+								}
+							}
+							return s;
+						}
+
+						function shuffle(array){
+							for(let i = array.length - 1; i > 0; i--){
+								const j = Math.floor(Math.random() * (i + 1));
+								[array[i], array[j]] = [array[j], array[i]];
+							}
+							return array;
+						}
+
+						function ensureShoe(){
+							if(!shoe || shoe.length < 15){
+								shoe = shuffle(buildShoe(DECKS));
+							}
+						}
 
 			function randFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-					function drawCards(){
-						const count = 2 + Math.floor(Math.random()*4); // 2..5
-						const newCards = [];
-						for(let i=0;i<count;i++){
-							newCards.push({ rank: randFrom(ranks), suit: randFrom(suits) });
+					function weightedPick(obj){
+						const entries = Object.entries(obj);
+						let total = 0;
+						for(const [,w] of entries) total += w;
+						let r = Math.random() * total;
+						for(const [key,w] of entries){
+							r -= w;
+							if(r <= 0) return parseInt(key,10);
 						}
+						return parseInt(entries[entries.length-1][0],10);
+					}
+
+					function drawCards(){
+						ensureShoe();
+						// Сначала вытянем 2 карты — это стартовая рука
+						const newCards = [];
+						for(let i=0;i<2;i++){
+							let card = shoe.shift();
+							if(!card){ ensureShoe(); card = shoe.shift(); }
+							newCards.push(card);
+						}
+
+						// Оценим наличие маленьких карт (2,3,4) в первых двух
+						const smallRanks = new Set(['2','3','4']);
+						let smallCount = 0;
+						for(const c of newCards) if(smallRanks.has(c.rank)) smallCount++;
+
+						// Базовые веса: чаще 2-3 карты, реже 4-5
+						let weights = {2:55,3:30,4:10,5:5};
+						// Если есть маленькие карты — повысим шанс на 4-5 карт
+						if(smallCount === 1){ weights = {2:35,3:30,4:20,5:15}; }
+						else if(smallCount >= 2){ weights = {2:15,3:25,4:30,5:30}; }
+
+						// Выберем итоговое количество карт
+						const target = weightedPick(weights);
+
+						// Достроим руку до target карт
+						while(newCards.length < target){
+							let card = shoe.shift();
+							if(!card){ ensureShoe(); card = shoe.shift(); }
+							newCards.push(card);
+						}
+
 						current = newCards;
 						renderCards();
 						elAnswer.value = '';
@@ -142,7 +210,7 @@
 				return parseInt(rank,10);
 			}
 
-			function computeTotals(cards){
+					function computeTotals(cards){
 				// cards: array of {rank}
 				let base = 0; let aces = 0;
 				for(const c of cards){
@@ -150,10 +218,10 @@
 					else base += cardValue(c.rank);
 				}
 				// If there is at least one ace and adding 10 (making one ace 11) doesn't bust -> soft
-				if(aces > 0 && base + 10 <= 21){
-					return {isSoft:true, low:base, high:base+10};
-				}
-				return {isSoft:false, total:base};
+						if(aces > 0 && base + 10 <= 21){
+							return {isSoft:true, low:base, high:base+10};
+						}
+						return {isSoft:false, total:base};
 			}
 
 			function normalizeUserInput(raw){
@@ -183,9 +251,19 @@
 
 			function checkAnswer(){
 				const expected = computeTotals(current);
-				let expectedDisplay;
-				if(expected.isSoft){ expectedDisplay = expected.low + '/' + expected.high; }
-				else { expectedDisplay = String(expected.total); }
+						// Если рука даёт экстремально большую сумму (маловероятно) — пересоздаём руку
+						if(!expected.isSoft && expected.total > 30){
+							// не засчитываем, пересоздаём реалистичную руку
+							setTimeout(drawCards, 50);
+							return;
+						}
+
+						let expectedDisplay;
+						if(expected.isSoft){
+							// Если high == 21 — в реальной игре мы покажем просто 21 (например A+K), поэтому ожидаем одно число
+							if(expected.high === 21){ expectedDisplay = String(21); }
+							else expectedDisplay = expected.low + '/' + expected.high;
+						} else { expectedDisplay = String(expected.total); }
 
 				const userRaw = elAnswer.value;
 				const userNorm = normalizeUserInput(userRaw);
