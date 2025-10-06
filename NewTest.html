@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Тренажёр: Сумма номиналов карт (Блекджек)</title>
+	<style>
+		:root{ --bg:#f4f6f8; --card-bg:#fff; --card-border:#222; --accent:#1a73e8 }
+		*{box-sizing:border-box}
+		body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--bg);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;color:#111}
+		.container{width:720px;max-width:95%;background:linear-gradient(180deg,#ffffff,#f8fafc);padding:28px;border-radius:12px;box-shadow:0 6px 24px rgba(20,20,40,0.08)}
+		h1{margin:0 0 12px;font-size:20px}
+		/* Перекрывающаяся стопка карт, как в блекджеке */
+	.cards{position:relative;margin:18px 0;display:block;min-height:220px;overflow:visible}
+	.card{width:120px;height:160px;border-radius:10px;background:linear-gradient(180deg,#fff,#fbfdff);border:2px solid var(--card-border);display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:10px;font-weight:700;color:#111;box-shadow:0 12px 30px rgba(30,30,60,0.14);position:absolute;left:50%;transform-origin:center center;transition:transform .18s ease, left .18s ease, top .18s ease}
+		/* Номиналы: уголки и большой центр */
+		.card .rank{font-size:34px;line-height:1}
+		.card .suit{font-size:18px;opacity:0.9}
+		.card .corner{position:absolute;display:flex;flex-direction:column;line-height:1}
+		.card .corner .r{font-weight:800}
+		.card .corner .s{font-size:16px;opacity:0.9}
+		.card .corner.top-left{left:8px;top:6px;align-items:flex-start}
+		.card .corner.bottom-right{right:8px;bottom:6px;align-items:flex-end;transform:rotate(180deg)}
+		.card .centerRank{position:relative;font-size:30px;opacity:0.95;margin-top:6px}
+		.controls{display:flex;gap:12px;align-items:center;justify-content:center;margin-bottom:12px}
+		input[type="text"]{padding:10px 12px;border-radius:8px;border:1px solid #cbd5e1;font-size:16px;width:220px}
+		button{background:var(--accent);color:#fff;border:none;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer}
+		button:active{transform:translateY(1px)}
+		.score{display:flex;gap:16px;justify-content:center;margin-top:12px}
+		.badge{padding:8px 12px;border-radius:8px;background:#fff;border:1px solid #e6eefc;min-width:120px;text-align:center}
+		.result{margin-top:14px;text-align:center;font-size:16px;height:22px}
+		.hint{margin-top:8px;text-align:center;color:#555;font-size:13px}
+		.footer{margin-top:18px;text-align:center;color:#666;font-size:13px}
+	@media (max-width:520px){.card{width:88px;height:120px}.cards{min-height:140px}}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Тренажёр: подсчёт суммы номиналов карт в блекджеке</h1>
+
+			<div class="cards" id="cards" aria-live="polite">
+				<!-- Карты будут сгенерированы JS: случайное количество 2-5 карт -->
+			</div>
+
+			<div class="controls">
+				<input type="text" id="answer" placeholder='Введите сумму, напр.: "13" или "7/17"' aria-label="Ответ">
+				<button id="checkBtn">Проверить</button>
+				<button id="newHandBtn" title="Сгенерировать новую руку">Новая рука</button>
+			</div>
+
+		<div class="score">
+			<div class="badge">Правильных: <span id="correct">0</span></div>
+			<div class="badge">Неправильных: <span id="wrong">0</span></div>
+		</div>
+
+		<div class="result" id="result"></div>
+		<div class="hint">Формат для мягкой руки (с тузом): X/Y, где X — Туз=1, Y — Туз=11 (меньшее/большее). Пример: A + 6 = 7/17. Количество карт рандомно: 2—5 карт, как в реальной игре.</div>
+		<div class="footer">Нажмите Enter или кнопку "Проверить" — введённый ответ очистится и генерация новой руки произойдёт автоматически.</div>
+	</div>
+
+	<script>
+		(function(){
+			const ranks = ['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+			const suits = ['♠','♥','♦','♣'];
+
+			const elCards = document.getElementById('cards');
+			const elAnswer = document.getElementById('answer');
+			const elCheck = document.getElementById('checkBtn');
+			const elNewHand = document.getElementById('newHandBtn');
+			const elCorrect = document.getElementById('correct');
+			const elWrong = document.getElementById('wrong');
+			const elResult = document.getElementById('result');
+
+			let correctCount = 0, wrongCount = 0;
+			let current = [];
+
+			function randFrom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+					function drawCards(){
+						const count = 2 + Math.floor(Math.random()*4); // 2..5
+						const newCards = [];
+						for(let i=0;i<count;i++){
+							newCards.push({ rank: randFrom(ranks), suit: randFrom(suits) });
+						}
+						current = newCards;
+						renderCards();
+						elAnswer.value = '';
+						elAnswer.focus();
+						elResult.textContent = '';
+					}
+
+					function renderCards(){
+						// Очистить контейнер
+						elCards.innerHTML = '';
+						// Расположим карты слева от центра с небольшим смещением
+						const total = current.length;
+						const spread = Math.min(28, 16 + total*6); // смещение по горизонтали
+						const startX = -((total-1)/2) * spread;
+									// Обновим подпись с количеством карт (более заметно)
+									let dbg = document.getElementById('cards-info');
+									if(!dbg){ dbg = document.createElement('div'); dbg.id = 'cards-info'; dbg.style.textAlign = 'center'; dbg.style.marginTop = '8px'; dbg.style.color = '#062b5b'; dbg.style.fontWeight = '600'; dbg.style.fontSize = '14px'; elCards.parentNode.insertBefore(dbg, elCards.nextSibling); }
+									dbg.textContent = `Карт: ${total}`;
+
+										current.forEach((c,i)=>{
+									const card = document.createElement('div');
+									card.className = 'card';
+									// содержимое
+									  // уголки с номиналом и мастью
+									  const cornerTop = document.createElement('div'); cornerTop.className = 'corner top-left';
+									  const cRank1 = document.createElement('div'); cRank1.className = 'r'; cRank1.textContent = c.rank;
+									  const cSuit1 = document.createElement('div'); cSuit1.className = 's'; cSuit1.textContent = c.suit;
+									  cornerTop.appendChild(cRank1); cornerTop.appendChild(cSuit1);
+									  const cornerBottom = document.createElement('div'); cornerBottom.className = 'corner bottom-right';
+									  const cRank2 = document.createElement('div'); cRank2.className = 'r'; cRank2.textContent = c.rank;
+									  const cSuit2 = document.createElement('div'); cSuit2.className = 's'; cSuit2.textContent = c.suit;
+									  cornerBottom.appendChild(cRank2); cornerBottom.appendChild(cSuit2);
+									  // центральный большой номинал (для красоты)
+									  const center = document.createElement('div'); center.className='centerRank'; center.textContent = c.rank;
+									  card.appendChild(cornerTop); card.appendChild(center); card.appendChild(cornerBottom);
+
+									  // позиционирование: лесенка — увеличим смещение по X и Y, чтобы номиналы всех карт были видны
+									  const spreadX = 34; // шаг по горизонтали — так, чтобы уголки были видны
+									  const x = startX + i*spreadX;
+									  const y = i * 8; // вертикальное смещение для легкой лесенки
+									  const rot = (i - (total-1)/2) * 3; // мягкий угол поворота
+									  card.style.left = `calc(50% + ${x}px)`;
+									  card.style.top = `${6 + y}px`;
+									  card.style.transform = `translateX(-50%) rotate(${rot}deg)`;
+									  // верхние карты поверх
+									  card.style.zIndex = String(100 + i);
+
+									// цвет масти
+									if(c.suit === '♥' || c.suit === '♦') card.style.color = '#b91c1c'; else card.style.color = '#111';
+
+									elCards.appendChild(card);
+								});
+					}
+
+			function cardValue(rank){
+				if(rank === 'A') return null; // special
+				if(['J','Q','K'].includes(rank)) return 10;
+				return parseInt(rank,10);
+			}
+
+			function computeTotals(cards){
+				// cards: array of {rank}
+				let base = 0; let aces = 0;
+				for(const c of cards){
+					if(c.rank === 'A') { aces++; base += 1; }
+					else base += cardValue(c.rank);
+				}
+				// If there is at least one ace and adding 10 (making one ace 11) doesn't bust -> soft
+				if(aces > 0 && base + 10 <= 21){
+					return {isSoft:true, low:base, high:base+10};
+				}
+				return {isSoft:false, total:base};
+			}
+
+			function normalizeUserInput(raw){
+				if(!raw || typeof raw !== 'string') return null;
+				// Remove leading/trailing spaces
+				let s = raw.trim();
+				// Normalize spaces around slash
+				s = s.replace(/\s*\/\s*/g,'/');
+				// Replace multiple spaces
+				s = s.replace(/\s+/g,' ');
+				// If contains slash, expect two numbers
+				if(s.includes('/')){
+					const parts = s.split('/');
+					if(parts.length !== 2) return null;
+					const a = parseInt(parts[0],10);
+					const b = parseInt(parts[1],10);
+					if(!Number.isFinite(a) || !Number.isFinite(b)) return null;
+					// canonical order: smaller/greater
+					const low = Math.min(a,b), high = Math.max(a,b);
+					return low + '/' + high;
+				}
+				// single number
+				const n = parseInt(s,10);
+				if(!Number.isFinite(n)) return null;
+				return String(n);
+			}
+
+			function checkAnswer(){
+				const expected = computeTotals(current);
+				let expectedDisplay;
+				if(expected.isSoft){ expectedDisplay = expected.low + '/' + expected.high; }
+				else { expectedDisplay = String(expected.total); }
+
+				const userRaw = elAnswer.value;
+				const userNorm = normalizeUserInput(userRaw);
+
+				let ok = false;
+				if(userNorm !== null){
+					// strict compare to canonical expected
+					if(userNorm === expectedDisplay) ok = true;
+					else {
+						// accept also if user provided both numbers reversed or with spaces — normalizeUserInput already handles order, but keep this as safety
+						// For single value accept numeric equality
+						if(!expected.isSoft){ if(parseInt(userNorm,10) === expected.total) ok = true; }
+					}
+				}
+
+						if(ok){
+							correctCount++;
+							elCorrect.textContent = correctCount;
+							elResult.textContent = 'Правильно ✅';
+							elResult.style.color = 'green';
+							// через небольшую паузу генерируем следующую руку
+							setTimeout(drawCards, 700);
+						} else {
+							// Неправильно: увеличиваем счётчик неправильных попыток, показываем сообщение и даём шанс повторить
+							wrongCount++;
+							elWrong.textContent = wrongCount;
+							elResult.textContent = 'Неправильно ❌ — попробуйте ещё раз';
+							elResult.style.color = 'crimson';
+							// НЕ генерируем новую руку — пользователь должен исправить ответ
+						}
+			}
+
+			// Events
+			elCheck.addEventListener('click', ()=>{ checkAnswer(); });
+			elNewHand.addEventListener('click', ()=>{ drawCards(); });
+			elAnswer.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); checkAnswer(); } });
+
+			// начальная генерация
+			drawCards();
+		})();
+	</script>
+</body>
+</html>
