@@ -156,6 +156,7 @@
         <div id="timer" style="display:none;">⏱ Время: 0 мин 00 сек</div>
 
         <div id="question" class="question"></div>
+  <div id="chipsInfo" class="small" style="text-align:center; margin-bottom:8px;"></div>
 
         <div id="options" class="options"></div>
 
@@ -246,13 +247,13 @@
 
     // Раздел 7 и 8: числа кратные 5 от 5 до 500 (уникальные 20)
     function generateMultiplesOf5Examples() {
-      // создаём массив кратных 5 от 5 до 500
-      const list = [];
-      for (let v = 5; v <= 500; v += 5) list.push(v);
-      shuffle(list);
-      const picked = list.slice(0,20);
-      // ответ = value * 1.5
-      return picked.map(v => ({ q: `${v} × 1.50`, a: +(v * 1.5), base: 1.5, val: v }));
+      // Allowed bets: from 5 to 500 with step 5 (5,10,15,...,500)
+      const allowedBets = [];
+      for (let v = 5; v <= 500; v += 5) allowedBets.push(v);
+      shuffle(allowedBets);
+      const picked = allowedBets.slice(0,20);
+      // answer = value * 1.5
+      return picked.map(v => ({ q: `${v} × 1.50`, a: Math.round(v * 1.5 * 100) / 100, base: 1.5, val: v }));
     }
 
     /* ---------- разделы старт / показ ---------- */
@@ -316,6 +317,14 @@
         questions = generateMultiplesOf5Examples(); // ввод ответов на время
         document.getElementById("quizTitle").textContent = "Раздел 8: тест на скорость (1.50)";
         startTimer();
+      }
+
+      // chips info for sections 7 and 8
+      const chipsInfoEl = document.getElementById('chipsInfo');
+      if (section === 7 || section === 8) {
+        chipsInfoEl.textContent = '';
+      } else {
+        chipsInfoEl.textContent = '';
       }
 
       document.getElementById("menu").style.display = "none";
@@ -436,10 +445,22 @@
           const delta = Math.floor(Math.random()*15)+1;
           wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
         } else if (ex.base === 1.5) {
-          // special for 1.5: produce wrongs near correct (±2.5, ±5, ±7.5)
-          const deltas = [2.5,5,7.5,10,12.5,15];
-          const d = deltas[Math.floor(Math.random()*deltas.length)];
-          wrong = Math.round((ex.a + (Math.random()<0.5 ? -d : d)) * 100) / 100;
+          // For 1.5: choose wrong payouts generated from allowed bets (5..500 step 5)
+          const allowedBets = [];
+          for (let v = 5; v <= 500; v += 5) allowedBets.push(v);
+          // pick a random allowed bet different from the current example's bet
+          let bet = allowedBets[Math.floor(Math.random() * allowedBets.length)];
+          // retry until different or after a few attempts
+          let attempts = 0;
+          while (bet === ex.val && attempts < 10) {
+            bet = allowedBets[Math.floor(Math.random() * allowedBets.length)];
+            attempts++;
+          }
+          if (bet === ex.val) {
+            // as fallback pick neighbor
+            bet = ex.val + 5 <= 500 ? ex.val + 5 : ex.val - 5;
+          }
+          wrong = Math.round(bet * 1.5 * 100) / 100;
         } else {
           const delta = Math.floor(Math.random()*10)+1;
           wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
@@ -479,6 +500,20 @@
         return;
       }
       if (isEqualNumber(userVal, ex.a)) {
+        // If section 8, validate that the implied bet is allowed (5..500 step 5)
+        if (currentSection === 8) {
+          const impliedBet = Math.round((userVal / 1.5) * 100) / 100; // two decimals
+          const eps = 1e-6;
+          const isInRange = impliedBet + eps >= 5 && impliedBet - eps <= 500;
+          const multipleOf5 = Math.abs(Math.round(impliedBet / 5) - (impliedBet / 5)) < 1e-6;
+          if (!isInRange || !multipleOf5) {
+            feedbackEl.textContent = `❌ Неверная ставка: выплата ${formatDisplay(userVal)} не соответствует допустимой ставке (5,10,...,500).`;
+            feedbackEl.className = "wrong";
+            mistakes++;
+            return;
+          }
+        }
+
         feedbackEl.textContent = "✅ Правильно!";
         feedbackEl.className = "correct";
         currentIndex++;
