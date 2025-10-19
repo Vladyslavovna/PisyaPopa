@@ -1,141 +1,43 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Тренажёр умножения</title>
+  <meta charset="utf-8" />
+  <title>Тренажёр умножения (1–10 разделы)</title>
   <style>
-    /* --- стиль в духе твоего скрина --- */
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #eef3f8;
-      color: #333;
-    }
-    header {
-      background: #4f90db;
-      color: #fff;
-      padding: 36px 0;
-      text-align: center;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 32px;
-      font-weight: 700;
-    }
-
-    .wrap {
-      display: flex;
-      justify-content: center;
-      margin-top: 40px;
-      padding: 20px;
-    }
-
-    .card {
-      width: 680px;
-      background: #fff;
-      border-radius: 10px;
-      padding: 28px;
-      box-shadow: 0 6px 18px rgba(20,40,60,0.08);
-    }
-
-    h2 {
-      margin: 0 0 18px 0;
-      color: #3b84d8;
-      text-align: center;
-      font-size: 22px;
-    }
-
-    .menu button {
-      width: 100%;
-      display: block;
-      margin: 10px 0;
-      padding: 12px 16px;
-      border-radius: 8px;
-      border: none;
-      background: #4f90db;
-      color: white;
-      font-size: 15px;
-      cursor: pointer;
-    }
-    .menu button:hover { background: #3b7fd0; }
-
-    .quiz .question {
-      font-size: 20px;
-      margin: 12px 0 18px 0;
-      text-align: center;
-    }
-
-    .options { display:flex; flex-direction:column; gap:10px; align-items:center; margin-bottom:10px; }
-    .options button {
-      width: 90%;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-      background: #eef4fb;
-      cursor: pointer;
-      font-size: 16px;
-    }
-    .options button:hover { background: #e0ebfb; }
-    .options button.correct { background: #bff0bf !important; color: #1a5a1a; }
-    .options button.wrong { background: #ffc6c6 !important; color: #4d0b0b; }
-
-    #timer {
-      font-weight: 600;
-      text-align: center;
-      margin-bottom: 10px;
-      color: #333;
-    }
-
-    #inputArea { display:flex; gap:10px; justify-content:center; align-items:center; margin-bottom:10px; }
-    input[type="number"], input[type="text"] {
-      padding: 10px 12px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #cfddea;
-      width: 180px;
-      text-align: center;
-    }
-    #submitBtn, #nextBtn, #backBtn {
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: none;
-      font-size: 15px;
-      cursor: pointer;
-      background: #4f90db;
-      color: white;
-    }
-    #nextBtn { display: none; }
-    #backBtn { background: #8a8a8a; margin-top: 10px; }
-
-    #feedback {
-      text-align: center;
-      font-weight: 700;
-      margin-top: 8px;
-      min-height: 24px;
-    }
-    #feedback.correct { color: #198754; }
-    #feedback.wrong { color: #cc2b2b; }
-
-    .footer-row { display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:16px; }
-    .small { font-size: 13px; color: #666; }
-
-    /* responsive */
-    @media (max-width:720px) {
-      .card { width: 92%; padding: 18px; }
-      input[type="number"] { width: 140px; }
-      .options button { width: 100%; }
-    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#eef3f8;color:#333}
+    header{background:#4f90db;color:#fff;padding:36px 0;text-align:center}
+    header h1{margin:0;font-size:32px;font-weight:700}
+    .wrap{display:flex;justify-content:center;margin-top:40px;padding:20px}
+    .card{width:680px;background:#fff;border-radius:10px;padding:28px;box-shadow:0 6px 18px rgba(20,40,60,.08)}
+    h2{margin:0 0 18px 0;color:#3b84d8;text-align:center;font-size:22px}
+    .menu button{width:100%;display:block;margin:10px 0;padding:12px 16px;border-radius:8px;border:none;background:#4f90db;color:#fff;font-size:15px;cursor:pointer}
+    .menu button:hover{background:#3b7fd0}
+    .quiz .question{font-size:20px;margin:12px 0 18px 0;text-align:center}
+    .options{display:flex;flex-direction:column;gap:10px;align-items:center;margin-bottom:10px}
+    .options button{width:90%;padding:10px;border-radius:8px;border:none;background:#eef4fb;cursor:pointer;font-size:16px}
+    .options button:hover{background:#e0ebfb}
+    .options button.correct{background:#bff0bf!important;color:#1a5a1a}
+    .options button.wrong{background:#ffc6c6!important;color:#4d0b0b}
+    #timer{font-weight:600;text-align:center;margin-bottom:10px;color:#333}
+    #inputArea{display:flex;gap:10px;justify-content:center;align-items:center;margin-bottom:10px}
+    input[type="number"],input[type="text"]{padding:10px 12px;font-size:16px;border-radius:8px;border:1px solid #cfddea;width:180px;text-align:center}
+    #submitBtn,#nextBtn,#backBtn{padding:10px 14px;border-radius:8px;border:none;font-size:15px;cursor:pointer;background:#4f90db;color:#fff}
+    #nextBtn{display:none}
+    #backBtn{background:#8a8a8a;margin-top:10px}
+    #feedback{text-align:center;font-weight:700;margin-top:8px;min-height:24px}
+    #feedback.correct{color:#198754}
+    #feedback.wrong{color:#cc2b2b}
+    .footer-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:16px}
+    .small{font-size:13px;color:#666}
+    @media(max-width:720px){.card{width:92%;padding:18px}input[type="number"]{width:140px}.options button{width:100%}}
   </style>
 </head>
 <body>
-  <header>
-    <h1>Тренажёр умножения</h1>
-  </header>
+  <header><h1>Тренажёр умножения</h1></header>
 
   <div class="wrap">
     <div class="card">
-      <!-- Главное меню -->
       <div id="menu" class="menu">
         <h2>Выбери раздел</h2>
         <button onclick="startSection(1)">Раздел 1: умножение на 35</button>
@@ -146,30 +48,24 @@
         <button onclick="startSection(6)">Раздел 6: тест на скорость (35,17,8,5)</button>
         <button onclick="startSection(7)">Раздел 7: умножение на 1.50</button>
         <button onclick="startSection(8)">Раздел 8: тест на скорость (1.50)</button>
-        <h2><a href="NewTest.html">Тренажёр для счёта номинала BJ</a></h2>
+        <button onclick="startSection(9)">Раздел 9: умножение на 1.50 (таблица BJ)</button>
+        <button onclick="startSection(10)">Раздел 10: тест на скорость (таблица BJ)</button>
       </div>
 
-      <!-- Экран теста -->
       <div id="quiz" class="quiz" style="display:none;">
         <h2 id="quizTitle"></h2>
-
-        <!-- Таймер: показываем только для разделов 6 и 8 -->
-        <div id="timer" style="display:none;">⏱ Время: 0 мин 00 сек</div>
-
+        <div id="timer" style="display:none">⏱ Время: 0 мин 00 сек</div>
         <div id="question" class="question"></div>
-  <div id="chipsInfo" class="small" style="text-align:center; margin-bottom:8px;"></div>
-
         <div id="options" class="options"></div>
 
-        <!-- input area (для разделов 6 и 8) -->
-        <div id="inputArea" style="display:none;">
+        <div id="inputArea" style="display:none">
           <input id="answerInput" type="text" inputmode="decimal" placeholder="Введите ответ">
           <button id="submitBtn" onclick="submitAnswer()">Ответить</button>
         </div>
 
         <div id="feedback"></div>
 
-        <div style="text-align:center; margin-top:12px;">
+        <div style="text-align:center;margin-top:12px">
           <button id="nextBtn" onclick="nextQuestion()">Следующий</button>
         </div>
 
@@ -181,384 +77,323 @@
     </div>
   </div>
 
-  <script>
-    /* ========== общие данные и состояния ========== */
-    let currentSection = 0;
-    let questions = [];
-    let currentIndex = 0;
-    let score = 0;        // количество правильных в разделах 1-5
-    let mistakes = 0;     // количество ошибок в разделах 6,7,8 где требуется
-    let timerInterval = null;
-    let seconds = 0;
+<script>
+/* ========== Состояние ========== */
+let currentSection=0;
+let questions=[];
+let currentIndex=0;
+let score=0;      // for sections 1-5
+let mistakes=0;   // for sections where we count errors (6,7,8,9,10)
+let timerInterval=null;
+let seconds=0;
 
-    /* ---------- генераторы ---------- */
+/* ========== Таблицы и генераторы ========== */
 
-    // Генерация уникальных примеров для баз (1..20)
-    function generateUniqueExamples(base) {
-      let arr = [];
-      for (let i = 1; i <= 20; i++) arr.push({ q: `${base} × ${i}`, a: base * i, base: base });
-      shuffle(arr);
-      return arr;
+// значения таблицы BJ, точно как на твоём фото (включая 125,150,...,600)
+const BJ_VALUES = [
+ 5,10,15,20,25,30,35,40,45,50,
+ 55,60,65,70,75,80,85,90,95,100,
+ 125,150,175,200,225,250,275,300,325,350,
+ 375,400,425,450,475,500,550,600
+];
+
+// генерация уникальных примеров для base (1..20)
+function generateUniqueExamples(base){
+  const arr=[];
+  for(let i=1;i<=20;i++) arr.push({q:`${base} × ${i}`, a: base * i, base});
+  return shuffle(arr);
+}
+
+// сложные выражения (как раньше)
+function generateComplexExamples(){
+  const bases=[35,17,8,5];
+  const examples=[];
+  for(let i=0;i<20;i++){
+    const partsCount = Math.floor(Math.random()*3)+2; // 2..4
+    const expr=[];
+    let sum=0;
+    for(let j=0;j<partsCount;j++){
+      const base=bases[Math.floor(Math.random()*bases.length)];
+      const num=Math.floor(Math.random()*20)+1;
+      expr.push(`(${base} × ${num})`);
+      sum += base * num;
     }
+    examples.push({q: expr.join(" + "), a: sum, base:"complex"});
+  }
+  return examples;
+}
 
-    // Перемешать массив
-    function shuffle(arr) {
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      return arr;
-    }
+// раздел 6: смешанные уникальные примеры из [35,17,8,5]
+function generateMixedUniqueExamples(){
+  const bases=[35,17,8,5];
+  const set=new Set();
+  const res=[];
+  while(res.length<20){
+    const base=bases[Math.floor(Math.random()*bases.length)];
+    const num=Math.floor(Math.random()*20)+1;
+    const key=`${base}×${num}`;
+    if(!set.has(key)){ set.add(key); res.push({q:`${base} × ${num}`, a: base * num, base}); }
+  }
+  return shuffle(res);
+}
 
-    // Сложные выражения (как раньше)
-    function generateComplexExamples() {
-      const bases = [35,17,8,5];
-      let examples = [];
-      for (let i = 0; i < 20; i++) {
-        let partsCount = Math.floor(Math.random() * 3) + 2; // 2..4
-        let expr = [];
-        let sum = 0;
-        for (let j = 0; j < partsCount; j++) {
-          let base = bases[Math.floor(Math.random()*bases.length)];
-          let num = Math.floor(Math.random()*20) + 1;
-          expr.push(`(${base} × ${num})`);
-          sum += base * num;
-        }
-        examples.push({ q: expr.join(" + "), a: sum, base: "complex" });
-      }
-      return examples;
-    }
+// раздел 7 & 8: ставки кратные 5 от 5 до 500 (модель фишек, сумма кратна 5)
+function generateMultiplesOf5Examples(){
+  const list=[];
+  for(let v=5; v<=500; v+=5) list.push(v);
+  shuffle(list);
+  const picked = list.slice(0,20);
+  return picked.map(v => ({ q: `${v} × 1.50`, a: +(v * 1.5), base:1.5, val:v }));
+}
 
-    // Раздел 6: смешанные примеры (35,17,8,5) без повторов
-    function generateMixedUniqueExamples() {
-      const bases = [35,17,8,5];
-      let all = new Set();
-      let res = [];
-      while (res.length < 20) {
-        let base = bases[Math.floor(Math.random()*bases.length)];
-        let num = Math.floor(Math.random()*20) + 1;
-        let key = `${base}×${num}`;
-        if (!all.has(key)) {
-          all.add(key);
-          res.push({ q: `${base} × ${num}`, a: base * num, base });
-        }
-      }
-      return shuffle(res);
-    }
+// раздел 9 & 10: именно по списку BJ_VALUES (умножить на 1.5)
+function generateBJExamples(){
+  const arr = BJ_VALUES.slice();
+  shuffle(arr);
+  const picked = arr.slice(0,20);
+  return picked.map(v => ({ q: `${v} × 1.50`, a: +(v * 1.5), base:1.5, val:v }));
+}
 
-    // Раздел 7 и 8: числа кратные 5 от 5 до 500 (уникальные 20)
-    function generateMultiplesOf5Examples() {
-      // Allowed bets: from 5 to 500 with step 5 (5,10,15,...,500)
-      const allowedBets = [];
-      for (let v = 5; v <= 500; v += 5) allowedBets.push(v);
-      shuffle(allowedBets);
-      const picked = allowedBets.slice(0,20);
-      // answer = value * 1.5
-      return picked.map(v => ({ q: `${v} × 1.50`, a: Math.round(v * 1.5 * 100) / 100, base: 1.5, val: v }));
-    }
+/* ========== Вспомогательные ========== */
 
-    /* ---------- разделы старт / показ ---------- */
+function shuffle(arr){
+  for(let i=arr.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [arr[i],arr[j]]=[arr[j],arr[i]];
+  }
+  return arr;
+}
 
-    function startTimer() {
-      seconds = 0;
-      const tEl = document.getElementById("timer");
-      tEl.style.display = "block";
-      tEl.textContent = formatTimer(seconds);
-      if (timerInterval) clearInterval(timerInterval);
-      timerInterval = setInterval(() => {
-        seconds++;
-        tEl.textContent = formatTimer(seconds);
-      }, 1000);
-    }
+function formatDisplay(val){
+  // покажем без лишних нулей; дроби с .5 остаются
+  if(Math.abs(val - Math.round(val)) < 1e-9) return String(Math.round(val));
+  // округлим до 2 знаков, но уберём лишние нули
+  return (Math.round(val*100)/100).toString();
+}
 
-    function stopTimer() {
-      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
-    }
+function isEqualNumber(a,b){
+  return Math.abs(a-b) < 1e-6;
+}
 
-    function formatTimer(sec) {
-      const m = Math.floor(sec/60);
-      const s = sec % 60;
-      return `⏱ Время: ${m} мин ${s < 10 ? "0"+s : s} сек`;
-    }
+/* ========== Таймер ========== */
 
-    function startSection(section) {
-      currentSection = section;
-      currentIndex = 0;
-      score = 0;
-      mistakes = 0;
+function startTimer(){
+  seconds = 0;
+  const tEl = document.getElementById('timer');
+  tEl.style.display = 'block';
+  tEl.textContent = formatTimer(seconds);
+  if(timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(()=>{ seconds++; tEl.textContent = formatTimer(seconds); }, 1000);
+}
+function stopTimer(){
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+}
+function formatTimer(sec){
+  const m = Math.floor(sec/60);
+  const s = sec % 60;
+  return `⏱ Время: ${m} мин ${s < 10 ? '0'+s : s} сек`;
+}
+
+/* ========== Старт раздела и показ вопросов ========== */
+
+function startSection(section){
+  currentSection = section;
+  currentIndex = 0;
+  score = 0;
+  mistakes = 0;
+  stopTimer();
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('feedback').textContent = '';
+
+  if(section === 1){ questions = generateUniqueExamples(35); document.getElementById('quizTitle').textContent = 'Раздел 1: умножение на 35'; }
+  else if(section === 2){ questions = generateUniqueExamples(17); document.getElementById('quizTitle').textContent = 'Раздел 2: умножение на 17'; }
+  else if(section === 3){ questions = generateUniqueExamples(8); document.getElementById('quizTitle').textContent = 'Раздел 3: умножение на 8'; }
+  else if(section === 4){ questions = generateUniqueExamples(5); document.getElementById('quizTitle').textContent = 'Раздел 4: умножение на 5'; }
+  else if(section === 5){ questions = generateComplexExamples(); document.getElementById('quizTitle').textContent = 'Раздел 5: сложные выражения'; }
+  else if(section === 6){ questions = generateMixedUniqueExamples(); document.getElementById('quizTitle').textContent = 'Раздел 6: тест на скорость (35,17,8,5)'; startTimer(); }
+  else if(section === 7){ questions = generateMultiplesOf5Examples(); document.getElementById('quizTitle').textContent = 'Раздел 7: умножение на 1.50'; }
+  else if(section === 8){ questions = generateMultiplesOf5Examples(); document.getElementById('quizTitle').textContent = 'Раздел 8: тест на скорость (1.50)'; startTimer(); }
+  else if(section === 9){ questions = generateBJExamples(); document.getElementById('quizTitle').textContent = 'Раздел 9: умножение на 1.50 (таблица BJ)'; }
+  else if(section === 10){ questions = generateBJExamples(); document.getElementById('quizTitle').textContent = 'Раздел 10: тест на скорость (таблица BJ)'; startTimer(); }
+
+  document.getElementById('menu').style.display = 'none';
+  document.getElementById('quiz').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion(){
+  const qEl = document.getElementById('question');
+  const opts = document.getElementById('options');
+  const inputArea = document.getElementById('inputArea');
+  const progressText = document.getElementById('progressText');
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  progressText.textContent = `${currentIndex} / ${questions.length}`;
+
+  if(currentIndex >= questions.length){
+    // конец теста: разные выводы
+    if(currentSection === 6 || currentSection === 8 || currentSection === 10){
       stopTimer();
-      document.getElementById("timer").style.display = "none";
-      document.getElementById("nextBtn").style.display = "none";
-      document.getElementById("feedback").textContent = "";
-
-      if (section === 1) {
-        questions = generateUniqueExamples(35);
-        document.getElementById("quizTitle").textContent = "Раздел 1: умножение на 35";
-      } else if (section === 2) {
-        questions = generateUniqueExamples(17);
-        document.getElementById("quizTitle").textContent = "Раздел 2: умножение на 17";
-      } else if (section === 3) {
-        questions = generateUniqueExamples(8);
-        document.getElementById("quizTitle").textContent = "Раздел 3: умножение на 8";
-      } else if (section === 4) {
-        questions = generateUniqueExamples(5);
-        document.getElementById("quizTitle").textContent = "Раздел 4: умножение на 5";
-      } else if (section === 5) {
-        questions = generateComplexExamples();
-        document.getElementById("quizTitle").textContent = "Раздел 5: сложные выражения";
-      } else if (section === 6) {
-        questions = generateMixedUniqueExamples();
-        document.getElementById("quizTitle").textContent = "Раздел 6: тест на скорость (35,17,8,5)";
-        startTimer();
-      } else if (section === 7) {
-        questions = generateMultiplesOf5Examples(); // ответы value*1.5, множественный выбор
-        document.getElementById("quizTitle").textContent = "Раздел 7: умножение на 1.50";
-        // для раздела 7 таймер не нужен (как в 1-5)
-      } else if (section === 8) {
-        questions = generateMultiplesOf5Examples(); // ввод ответов на время
-        document.getElementById("quizTitle").textContent = "Раздел 8: тест на скорость (1.50)";
-        startTimer();
-      }
-
-      // chips info for sections 7 and 8
-      const chipsInfoEl = document.getElementById('chipsInfo');
-      if (section === 7 || section === 8) {
-        chipsInfoEl.textContent = '';
-      } else {
-        chipsInfoEl.textContent = '';
-      }
-
-      document.getElementById("menu").style.display = "none";
-      document.getElementById("quiz").style.display = "block";
-      showQuestion();
+      const time = formatTimer(seconds);
+      qEl.innerHTML = `<h3>Тест завершён!</h3><p>Количество ошибок: ${mistakes}</p><p>${time}</p>`;
+      opts.innerHTML = '';
+      inputArea.style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'none';
+    } else if(currentSection === 7 || currentSection === 9){
+      // тесты с вариантами: показать количество ошибок (пользователь просил именно ошибки)
+      qEl.innerHTML = `<h3>Тест завершён!</h3><p>Количество ошибок: ${mistakes}</p>`;
+      opts.innerHTML = '';
+      inputArea.style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'none';
+    } else {
+      // разделы 1-5: оригинальная логика — показываем количество правильных ответов
+      qEl.innerHTML = `<h3>Тест завершён!</h3><p>Правильных ответов: ${score} из ${questions.length}</p>`;
+      opts.innerHTML = '';
+      inputArea.style.display = 'none';
+      document.getElementById('nextBtn').style.display = 'none';
     }
+    progressText.textContent = `${questions.length} / ${questions.length}`;
+    return;
+  }
 
-    function showQuestion() {
-      const qEl = document.getElementById("question");
-      const opts = document.getElementById("options");
-      const inputArea = document.getElementById("inputArea");
-      const progressText = document.getElementById("progressText");
-      document.getElementById("feedback").textContent = "";
-      document.getElementById("nextBtn").style.display = "none";
+  const ex = questions[currentIndex];
+  qEl.textContent = `${currentIndex+1}) ${ex.q} = ?`;
 
-      // progress
-      progressText.textContent = `${currentIndex} / ${questions.length}`;
+  // Для разделов с вводом (6,8,10): показываем input
+  if(currentSection ===6 || currentSection===8 || currentSection===10){
+    opts.innerHTML = '';
+    inputArea.style.display = 'flex';
+    document.getElementById('answerInput').value = '';
+    document.getElementById('answerInput').focus();
+    document.getElementById('timer').style.display = 'block';
+  } else {
+    // Для разделов 1-5,7,9 — показываем варианты
+    inputArea.style.display = 'none';
+    document.getElementById('timer').style.display = 'none';
+    opts.innerHTML = '';
 
-      if (currentIndex >= questions.length) {
-        // конец теста - разный вывод для разных секций
-        if (currentSection === 6) {
-          stopTimer();
-          const time = formatTimer(seconds);
-          qEl.innerHTML = `<h3>Тест завершён!</h3><p>Количество ошибок: ${mistakes}</p><p>${time}</p>`;
-          opts.innerHTML = "";
-          inputArea.style.display = "none";
-          document.getElementById("nextBtn").style.display = "none";
-        } else if (currentSection === 8) {
-          stopTimer();
-          const time = formatTimer(seconds);
-          qEl.innerHTML = `<h3>Тест завершён!</h3><p>Количество ошибок: ${mistakes}</p><p>${time}</p>`;
-          opts.innerHTML = "";
-          inputArea.style.display = "none";
-          document.getElementById("nextBtn").style.display = "none";
-        } else if (currentSection === 7) {
-          // раздел 7 — показать количество ошибок (пользователь просил ошибки для 7)
-          qEl.innerHTML = `<h3>Тест завершён!</h3><p>Количество ошибок: ${mistakes}</p>`;
-          opts.innerHTML = "";
-          inputArea.style.display = "none";
-          document.getElementById("nextBtn").style.display = "none";
+    const options = generateOptionsFor(ex, currentSection);
+    options.forEach(optVal => {
+      const btn = document.createElement('button');
+      btn.textContent = formatDisplay(optVal);
+      btn.onclick = () => {
+        // блокируем все кнопки
+        Array.from(opts.children).forEach(b => b.disabled = true);
+        if(isEqualNumber(optVal, ex.a)){
+          btn.classList.add('correct');
+          document.getElementById('feedback').textContent = '✅ Правильно!';
+          document.getElementById('feedback').className = 'correct';
+          if(currentSection >=1 && currentSection <=5) score++;
+          // for 7 and 9 we count mistakes separately (we do not increase score)
         } else {
-          // разделы 1-5 — как было: показываем количество правильных ответов
-          qEl.innerHTML = `<h3>Тест завершён!</h3><p>Правильных ответов: ${score} из ${questions.length}</p>`;
-          opts.innerHTML = "";
-          inputArea.style.display = "none";
-          document.getElementById("nextBtn").style.display = "none";
+          btn.classList.add('wrong');
+          document.getElementById('feedback').textContent = `❌ Неправильно. Правильный ответ: ${formatDisplay(ex.a)}`;
+          document.getElementById('feedback').className = 'wrong';
+          if(currentSection === 7 || currentSection === 9) mistakes++;
         }
-        progressText.textContent = `${questions.length} / ${questions.length}`;
-        return;
-      }
-
-      // Обычный вопрос
-      const ex = questions[currentIndex];
-      qEl.textContent = `${currentIndex+1}) ${ex.q} = ?`;
-
-      // для секций 6 и 8 — показываем inputArea (ввод ответа)
-      if (currentSection === 6 || currentSection === 8) {
-        opts.innerHTML = "";
-        inputArea.style.display = "flex";
-        document.getElementById("answerInput").value = "";
-        document.getElementById("answerInput").focus();
-        // timer visible only for 6 and 8
-        document.getElementById("timer").style.display = "block";
-      } else {
-        // кнопки-опции для разделов 1-5 и 7
-        inputArea.style.display = "none";
-        document.getElementById("timer").style.display = "none";
-        // генерируем 4 опции (одна правильная, три неправильные)
-        opts.innerHTML = "";
-        const options = generateOptionsFor(ex);
-        options.forEach(optVal => {
-          const btn = document.createElement("button");
-          btn.textContent = formatDisplay(optVal);
-          btn.onclick = () => {
-            // блокируем кнопки и ставим feedback
-            Array.from(opts.children).forEach(b => b.disabled = true);
-            if (isEqualNumber(optVal, ex.a)) {
-              btn.classList.add("correct");
-              document.getElementById("feedback").textContent = "✅ Правильно!";
-              document.getElementById("feedback").className = "correct";
-              if (currentSection >=1 && currentSection <=5) score++;
-              // для раздела 7 тоже отмечаем правильный (но мы считаем ошибки separately)
-              // не увеличиваем score for 7 (we use mistakes), but we won't change mistakes on correct
-            } else {
-              btn.classList.add("wrong");
-              document.getElementById("feedback").textContent = `❌ Неправильно. Правильный ответ: ${formatDisplay(ex.a)}`;
-              document.getElementById("feedback").className = "wrong";
-              // если раздел 7 — считаем ошибку
-              if (currentSection === 7) mistakes++;
-            }
-            // показываем кнопку "Следующий" для перехода
-            document.getElementById("nextBtn").style.display = "inline-block";
-          };
-          opts.appendChild(btn);
-        });
-      }
-
-      // progress update
-      progressText.textContent = `${currentIndex} / ${questions.length}`;
-    }
-
-    /* ---------- генерация вариантов для кнопок (1-5,7) ---------- */
-
-    function generateOptionsFor(ex) {
-      // создаём набор возможных вариантов, включая правильный
-      const set = new Set();
-      set.add(ex.a);
-
-      // для раздела 7 ответы могут быть дробными (x*1.5). Нам нужно генерировать похожие варианты.
-      // логика: добавляем +/- дельты, учитывая тип base
-      while (set.size < 4) {
-        let wrong;
-        if (ex.base === 35 || ex.base === 5) {
-          // как раньше — шаги по 5
-          const delta = (Math.floor(Math.random()*5)+1) * 5;
-          wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
-        } else if (ex.base === 17 || ex.base === 8) {
-          const delta = Math.floor(Math.random()*15)+1;
-          wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
-        } else if (ex.base === 1.5) {
-          // For 1.5: choose wrong payouts generated from allowed bets (5..500 step 5)
-          const allowedBets = [];
-          for (let v = 5; v <= 500; v += 5) allowedBets.push(v);
-          // pick a random allowed bet different from the current example's bet
-          let bet = allowedBets[Math.floor(Math.random() * allowedBets.length)];
-          // retry until different or after a few attempts
-          let attempts = 0;
-          while (bet === ex.val && attempts < 10) {
-            bet = allowedBets[Math.floor(Math.random() * allowedBets.length)];
-            attempts++;
-          }
-          if (bet === ex.val) {
-            // as fallback pick neighbor
-            bet = ex.val + 5 <= 500 ? ex.val + 5 : ex.val - 5;
-          }
-          wrong = Math.round(bet * 1.5 * 100) / 100;
-        } else {
-          const delta = Math.floor(Math.random()*10)+1;
-          wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
-        }
-        if (wrong > 0) set.add(wrong);
-      }
-      // randomize order
-      const arr = Array.from(set);
-      return shuffle(arr);
-    }
-
-    function formatDisplay(val) {
-      // если целое — показываем без .0, если дробь с .5 — показываем 7.5
-      if (Math.abs(val - Math.round(val)) < 1e-9) return String(Math.round(val));
-      // оставляем максимум одно или два знака (обычно .5)
-      return (Math.round(val * 100) / 100).toString().replace('.', ',').replace(',', '.'); // ensure dot
-    }
-
-    function isEqualNumber(a,b) {
-      return Math.abs(a - b) < 1e-6;
-    }
-
-    /* ---------- обработка ввода для разделов 6 и 8 ---------- */
-
-    function submitAnswer() {
-      const input = document.getElementById("answerInput");
-      let raw = input.value.trim();
-      if (raw === '') return;
-      // заменим запятую на точку
-      raw = raw.replace(',', '.');
-      const userVal = Number(raw);
-      const ex = questions[currentIndex];
-      const feedbackEl = document.getElementById("feedback");
-      if (!isFinite(userVal)) {
-        feedbackEl.textContent = "Введите число";
-        feedbackEl.className = "wrong";
-        return;
-      }
-      if (isEqualNumber(userVal, ex.a)) {
-        // If section 8, validate that the implied bet is allowed (5..500 step 5)
-        if (currentSection === 8) {
-          const impliedBet = Math.round((userVal / 1.5) * 100) / 100; // two decimals
-          const eps = 1e-6;
-          const isInRange = impliedBet + eps >= 5 && impliedBet - eps <= 500;
-          const multipleOf5 = Math.abs(Math.round(impliedBet / 5) - (impliedBet / 5)) < 1e-6;
-          if (!isInRange || !multipleOf5) {
-            feedbackEl.textContent = `❌ Неверная ставка: выплата ${formatDisplay(userVal)} не соответствует допустимой ставке (5,10,...,500).`;
-            feedbackEl.className = "wrong";
-            mistakes++;
-            return;
-          }
-        }
-
-        feedbackEl.textContent = "✅ Правильно!";
-        feedbackEl.className = "correct";
-        currentIndex++;
-        // маленькая пауза перед следующим
-        setTimeout(showQuestion, 400);
-      } else {
-        feedbackEl.textContent = `❌ Ошибка, попробуй ещё!`;
-        feedbackEl.className = "wrong";
-        mistakes++;
-      }
-    }
-
-    /* ---------- переход на следующий (для кнопок) ---------- */
-
-    function nextQuestion() {
-      currentIndex++;
-      showQuestion();
-    }
-
-    function backToMenu() {
-      stopTimer();
-      document.getElementById("menu").style.display = "block";
-      document.getElementById("quiz").style.display = "none";
-      document.getElementById("timer").style.display = "none";
-      document.getElementById("feedback").textContent = "";
-    }
-
-    /* ---------- keyboard: Enter для подтверждения / next ---------- */
-    document.addEventListener('keydown', (e) => {
-      if (document.getElementById("quiz").style.display !== "block") return;
-      if (e.key === "Enter") {
-        if ((currentSection === 6 || currentSection === 8) && document.getElementById("inputArea").style.display === "flex") {
-          submitAnswer();
-        } else if (document.getElementById("nextBtn").style.display === "inline-block" || document.getElementById("nextBtn").style.display === "block") {
-          nextQuestion();
-        }
-      }
+        document.getElementById('nextBtn').style.display = 'inline-block';
+      };
+      opts.appendChild(btn);
     });
+  }
+  progressText.textContent = `${currentIndex} / ${questions.length}`;
+}
 
-    /* Инициализация: показать меню */
-    (function init() {
-      document.getElementById("menu").style.display = "block";
-      document.getElementById("quiz").style.display = "none";
-    })();
-  </script>
+/* ========== Генерация вариаций ответов (чтобы не угадывали) ========== */
+
+function generateOptionsFor(ex, section){
+  // возвращаем массив из 4 значений причём один верный
+  const set = new Set();
+  set.add(ex.a);
+
+  // Producing wrong options close to correct
+  while(set.size < 4){
+    let wrong;
+    if(section >=1 && section <=5){
+      // старая логика: если base 35 или 5 — шаги по 5, иначе +- delta
+      if(ex.base === 35 || ex.base === 5){
+        const delta = (Math.floor(Math.random()*5)+1) * 5;
+        wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
+      } else if(ex.base === 17 || ex.base === 8){
+        const delta = Math.floor(Math.random()*15)+1;
+        wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
+      } else {
+        const delta = Math.floor(Math.random()*10)+1;
+        wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
+      }
+    } else if(section === 7 || section === 9){
+      // special for 1.50 tests: wrongs near correct, using deltas typical for chips
+      // if val exists (for 7/9 ex.val), create plausible chip-sum mistakes: ±2.5, ±5, ±7.5, ±12.5, ±25
+      const deltas = [2.5,5,7.5,10,12.5,25,50];
+      const d = deltas[Math.floor(Math.random()*deltas.length)];
+      wrong = Math.round((ex.a + (Math.random()<0.5 ? -d : d)) * 100) / 100;
+    } else {
+      // fallback
+      const delta = Math.floor(Math.random()*20)+1;
+      wrong = Math.round((ex.a + (Math.random()<0.5 ? -delta : delta)) * 100) / 100;
+    }
+    if(wrong > 0) set.add(wrong);
+  }
+  return shuffle(Array.from(set));
+}
+
+/* ========== Обработка ввода для разделов 6,8,10 ========== */
+
+function submitAnswer(){
+  const input = document.getElementById('answerInput');
+  let raw = input.value.trim();
+  if(raw === '') return;
+  raw = raw.replace(',', '.');
+  const userVal = Number(raw);
+  const ex = questions[currentIndex];
+  const feedbackEl = document.getElementById('feedback');
+  if(!isFinite(userVal)){ feedbackEl.textContent = 'Введите число'; feedbackEl.className='wrong'; return; }
+  if(isEqualNumber(userVal, ex.a)){
+    feedbackEl.textContent = '✅ Правильно!';
+    feedbackEl.className = 'correct';
+    currentIndex++;
+    setTimeout(showQuestion, 400);
+  } else {
+    feedbackEl.textContent = '❌ Ошибка, попробуй ещё!';
+    feedbackEl.className = 'wrong';
+    mistakes++;
+  }
+}
+
+/* ========== Навигация ========== */
+
+function nextQuestion(){
+  currentIndex++;
+  showQuestion();
+}
+
+function backToMenu(){
+  stopTimer();
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('quiz').style.display = 'none';
+  document.getElementById('timer').style.display = 'none';
+  document.getElementById('feedback').textContent = '';
+}
+
+/* ========== Клавиатура: Enter = отправка / next ========== */
+document.addEventListener('keydown', (e) => {
+  if(document.getElementById('quiz').style.display !== 'block') return;
+  if(e.key === 'Enter'){
+    if((currentSection===6 || currentSection===8 || currentSection===10) && document.getElementById('inputArea').style.display === 'flex'){
+      submitAnswer();
+    } else if(document.getElementById('nextBtn').style.display === 'inline-block' || document.getElementById('nextBtn').style.display === 'block'){
+      nextQuestion();
+    }
+  }
+});
+
+/* ========== Инициализация ========== */
+(function init(){
+  document.getElementById('menu').style.display = 'block';
+  document.getElementById('quiz').style.display = 'none';
+})();
+</script>
 </body>
 </html>
